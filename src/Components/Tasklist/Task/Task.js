@@ -9,9 +9,13 @@ export default class Task extends Component {
   update = () => {
     this.setState({ updateTask: true });
   };
-  submitUpdate = obj => this.props.submitUpdate(obj)
+  submitUpdate = obj => this.props.submitUpdate(obj);
   cancelUpdate = () => this.setState({ updateTask: false });
   delete = () => this.props.delete(this.props.obj.id);
+  drag = () => this.props.drag(this.props.obj.id);
+  dragend = () => this.props.dragend(this.props.obj.id);
+  drop = () => this.props.drop(this.props.obj.id);
+
   render() {
     let C = "Task notification ";
     switch (this.props.obj.priority) {
@@ -29,7 +33,13 @@ export default class Task extends Component {
         break;
     }
     return (
-      <div className={C} draggable="true">
+      <div
+        className={C}
+        draggable="true"
+        onDrag={this.drag}
+        onDragEnd={this.dragend}
+        onDrop={this.drop}
+      >
         {this.state.updateTask ? (
           <TaskUpdate
             allowedCat={this.props.allowedCat}

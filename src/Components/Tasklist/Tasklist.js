@@ -34,7 +34,15 @@ export default class Tasklist extends Component {
       //   done: false
       // }
     ],
-    AddTask: false
+    AddTask: false,
+    dragev: {
+      draggedItem: {},
+      droppedList: "",
+      droppedItem: {},
+      isDrag: false,
+      isDrop: false,
+      list: null
+    }
   };
 
   delete = id => {
@@ -55,7 +63,10 @@ export default class Tasklist extends Component {
     ) {
       let stateUpdate = this.state.tasksArray;
       stateUpdate.forEach(elem => {
-        if (this.props.currentCat === elem.category || this.props.currentCat === "All") {
+        if (
+          this.props.currentCat === elem.category ||
+          this.props.currentCat === "All"
+        ) {
           elem.done = true;
         }
       });
@@ -81,7 +92,59 @@ export default class Tasklist extends Component {
     });
     this.setState({ tasksArray: currentState });
   };
+
+  drag = obj => {
+    let currentState = this.state.dragev;
+    currentState.draggedItem = obj;
+    this.setState({ dragev: currentState });
+  };
+  drop = obj => {
+    let currentState = this.state.dragev;
+    currentState.droppedItem = obj;
+    currentState.droppedList= this.props.title
+    currentState.isDrop = true;
+    currentState.list = false;
+    this.setState({ dragev: currentState });
+  };
+  dropList = () => {
+    let currentState = this.state.dragev;
+    if (currentState.list === null) {
+      currentState.list = true;
+    }
+    currentState.dropList = this.props.title;
+    currentState.isDrop = true;
+    this.setState({ dragev: currentState });
+    this.props.update(this.state.dragev);
+    currentState = {
+      draggedItem: {},
+      droppedList: "",
+      droppedItem: {},
+      isDrag: false,
+      isDrop: false,
+      list: null
+    };
+    this.setState({ dragev: currentState });
+  };
+  dragend = obj => {
+    let currentState = this.state.dragev;
+    currentState.droppedItem = obj;
+    if (currentState.isDrop === false) {
+      currentState.isDrag = false;
+    }
+    this.setState({ dragev: currentState });
+  };
+
   render() {
+    const insert = this.props.insert
+    if(insert !== null){
+      if (insert.distlist === this.props.title){
+        if(this.state.tasksArray = [])
+        {
+          this.setState({tasksArray:insert.src})
+        }
+      }
+      this.props.rmupdate()
+    }
     // let currentState = this.state.tasksArray;
 
     // currentState.forEach(elem => {
@@ -96,14 +159,15 @@ export default class Tasklist extends Component {
     //     if (e !== Breac) throw e;
     //   }
     //   elem.done = check;
-      
+
     // });
     // this.setState({ tasksArray: currentState });
     return (
-      <div className="tasksList">
+      <div className="tasksList" onDrop={this.dropList}>
         <p className="title">{this.props.title}</p>
         {this.state.tasksArray.map(elem =>
-          (this.props.currentCat === "All" || this.props.currentCat === elem.category) &&
+          (this.props.currentCat === "All" ||
+            this.props.currentCat === elem.category) &&
           elem.done === false ? (
             <Task
               key={elem.id}
@@ -111,6 +175,9 @@ export default class Tasklist extends Component {
               delete={this.delete}
               allowedCat={this.props.allowedCat}
               submitUpdate={this.submitUpdate}
+              drag={this.drag}
+              dragend={this.dragend}
+              drop={this.drop}
             />
           ) : (
             <Fragment key={elem.id}></Fragment>
